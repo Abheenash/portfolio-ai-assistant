@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Portfolio AI Assistant — demo</title>
+<style>
+  :root { --nav:#161d26; --card:#fff; --bg:#f2f3f3; --border:#c6c6cd; --border-soft:#e9ebed;
+    --text:#0f141a; --muted:#5f6b7a; --link:#006ce0; --orange:#ff9900; --ok:#037f0c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font:15px/1.5 "Helvetica Neue",Arial,sans-serif; background:var(--bg); color:var(--text); padding:2.5rem 1.2rem; }
+  .wrap { max-width:640px; margin:0 auto; }
+  h1 { font-size:1.5rem; margin-bottom:.4rem; }
+  p.sub { color:var(--muted); margin-bottom:1.4rem; }
+  code { background:#eef1f3; padding:.1em .35em; border-radius:4px; font-size:.9em; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .head { background:var(--nav); color:#fff; padding:.7rem .9rem; display:flex; align-items:center; gap:.55rem; }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px rgba(3,127,12,.22); }
+  .head small { display:block; color:#9aa7b4; font-size:.72rem; }
+  .log { height:360px; overflow-y:auto; padding:.9rem; display:flex; flex-direction:column; gap:.7rem; }
+  .msg { max-width:86%; padding:.6rem .75rem; border-radius:12px; font-size:.9rem; line-height:1.5; white-space:pre-wrap; word-wrap:break-word; }
+  .msg.user { align-self:flex-end; background:var(--nav); color:#f4f6f7; border-bottom-right-radius:4px; }
+  .msg.bot { align-self:flex-start; background:#fff; border:1px solid var(--border-soft); border-bottom-left-radius:4px; }
+  .msg.bot a { color:var(--link); } .msg.err { background:#fff4f4; border-color:#f3c2c2; color:#8a1f1f; }
+  .typing { align-self:flex-start; display:inline-flex; gap:4px; padding:.7rem .8rem; background:#fff; border:1px solid var(--border-soft); border-radius:12px; }
+  .typing span { width:6px; height:6px; border-radius:50%; background:var(--muted); animation:b 1.2s infinite both; }
+  .typing span:nth-child(2){animation-delay:.2s;} .typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes b { 0%,80%,100%{opacity:.25;} 40%{opacity:1;} }
+  form { display:flex; gap:.5rem; padding:.7rem .8rem; border-top:1px solid var(--border-soft); }
+  input { flex:1; border:1px solid var(--border); border-radius:9px; padding:.55rem .7rem; font-size:.9rem; outline:0; }
+  input:focus { border-color:var(--link); box-shadow:0 0 0 3px rgba(0,108,224,.15); }
+  button.send { background:var(--orange); border:0; border-radius:9px; padding:0 1rem; font-weight:700; cursor:pointer; }
+  .foot { color:var(--muted); font-size:.78rem; margin-top:1rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Portfolio AI Assistant</h1>
+  <p class="sub">A serverless RAG-style chatbot — <code>API Gateway → Lambda → Amazon Bedrock (Claude Haiku 4.5)</code>.
+     Grounded only in a curated knowledge base. This is the same widget embedded on
+     <a href="https://abheenash.com">abheenash.com</a>.</p>
+  <div class="card">
+    <div class="head"><span class="dot"></span><div><strong>Ask about Abheenash</strong><small>Claude Haiku 4.5 on Amazon Bedrock</small></div></div>
+    <div class="log" id="log"></div>
+    <form id="form"><input id="input" maxlength="1000" autocomplete="off" placeholder="Ask about his projects, skills, experience…" />
+      <button class="send" type="submit">Send</button></form>
+  </div>
+  <p class="foot">Set <code>ENDPOINT</code> in this file to your deployed <code>chat_endpoint</code> Terraform output.</p>
+</div>
+<script>
+  // Replace with your `terraform output chat_endpoint`.
+  const ENDPOINT = "https://ne57wtvij2.execute-api.us-east-1.amazonaws.com/chat";
+  const log = document.getElementById("log"), form = document.getElementById("form"), input = document.getElementById("input");
+  const history = []; let busy = false;
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const fmt = (t) => esc(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+      .replace(/\b((?:https?:\/\/)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s)]*)?)/gi, m => /@/.test(m)?m:`<a href="${m.startsWith("http")?m:"https://"+m}" target="_blank" rel="noopener">${m}</a>`)
+      .replace(/\b([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})\b/gi,'<a href="mailto:$1">$1</a>');
+  const add = (role, text) => { const d = document.createElement("div");
+    d.className = "msg " + (role==="user"?"user":role==="err"?"bot err":"bot");
+    d.innerHTML = role==="user"?esc(text):fmt(text); log.appendChild(d); log.scrollTop = log.scrollHeight; };
+  add("bot", "Hi! Ask me about Abheenash's AWS projects, skills, experience, or how to reach him.");
+  async function send(text){ text=(text||"").trim(); if(!text||busy) return; busy=true; input.value="";
+    add("user", text);
+    const dots=document.createElement("div"); dots.className="typing"; dots.innerHTML="<span></span><span></span><span></span>";
+    log.appendChild(dots); log.scrollTop=log.scrollHeight;
+    try { const r = await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({message:text,history:history.slice(-6)})});
+      const d = await r.json().catch(()=>({})); dots.remove();
+      if (r.ok && d.reply){ add("bot", d.reply); history.push({role:"user",content:text},{role:"assistant",content:d.reply}); }
+      else add("err","Assistant unavailable — email abheenash007@gmail.com.");
+    } catch(e){ dots.remove(); add("err","Network error — please retry."); } finally { busy=false; input.focus(); }
+  }
+  form.addEventListener("submit", e => { e.preventDefault(); send(input.value); });
+</script>
+</body>
+</html>
