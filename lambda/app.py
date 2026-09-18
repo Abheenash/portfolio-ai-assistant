@@ -26,28 +26,84 @@ _bedrock = boto3.client(
 
 # --- knowledge base (everything the assistant is allowed to know) ------------
 KNOWLEDGE_BASE = """
-# About Rajolu Abheenash
+# About Abheenash Rajolu
 
-Cloud & DevOps engineer based in Houston, TX. Open to work (cloud engineering,
-DevOps, cloud security). AWS Certified Solutions Architect - Associate (SAA-C03)
-and AWS Certified Cloud Practitioner (CLF-C02). M.S. in Computer & Systems
-Engineering, University of Houston (GPA 3.60, Dec 2025). B.Tech in CSE, VRS & YRN
+IT Analyst - Application Support at Phillips 66 in Houston, TX (Feb 2026 - present), and
+AWS Certified DevOps Engineer - Professional. Experience in cloud operations, production
+support, incident response, root-cause analysis, and CI/CD on AWS and Linux. Open to
+cloud engineering, DevOps, SRE, production support, and cloud security roles; willing to
+relocate. Certifications: AWS Certified DevOps Engineer - Professional (DOP-C02, Sep 2026),
+AWS Certified Solutions Architect - Associate (SAA-C03, Jul 2026), AWS Certified Cloud
+Practitioner (CLF-C02, Jun 2026). M.S. in Computer & Systems Engineering, University of
+Houston (GPA 3.60, Dec 2025; coursework: Principles of Internetworking, Introduction to
+Cybersecurity, Open Systems, Advanced Computer Architecture). B.Tech in CSE, VRS & YRN
 College, Chirala, India (Apr 2023).
 Links: portfolio abheenash.com, GitHub github.com/Abheenash, LinkedIn
-linkedin.com/in/abheenash, email abheenash007@gmail.com. Willing to relocate.
+linkedin.com/in/abheenash, email abheenash007@gmail.com.
 
 # Professional experience
 
+IT Analyst - Application Support, Phillips 66, Houston, TX (Feb 2026 - present). Current
+role. Supports 7 workplace applications for ~13,000 employees and contractors across
+refineries, terminals, and offices (contractor access, work permits, facility requests) on
+AWS and on-premises RHEL. Resolves ~20 production tickets a month using Splunk and SQL
+against Oracle and SQL Server. Fixed 12 production defects in Java, C++, and Perl,
+including a C++ memory leak in the site-access service that had required weekly restarts:
+reproduced it, isolated it with Valgrind and GDB, and delivered a peer-reviewed patch.
+Partners with application developers on enhancements, including bulk work-permit renewals
+in a legacy Ruby on Rails application. Added Splunk alerts and dashboards for on-prem
+Perl/C++ applications, Terraform-managed CloudWatch alarms for AWS workloads, and
+structured error logging; detected 3 failures before users reported them. On-call one week
+in five: executes recovery procedures, coordinates outages with development, plant IT, and
+the service desk, maintains runbooks, and presents trends at monthly service reviews. Uses
+GitHub Copilot and Amazon Q for log triage and script drafting, reviewing every suggestion.
+Project - Contractor Access Sync Repair (Apr 2026): built a nightly Java reconciliation job
+for ~3,500 active contractor records across Oracle, ISNetworld, and SAP; automated repairs
+and escalated unresolved issues with SQL diagnostics (RHEL/cron, Control-M, ServiceNow).
+Replaced manual pre-shift checks, cutting team-wide gate-access tickets from ~12 to ~4 a
+month, including during refinery turnarounds.
+
+Systems Engineering Intern, Cloudflare, Austin, TX (May 2025 - Aug 2025). Built a Go
+service to audit on-call ownership and alert routing across ~120 internal services,
+exporting gaps as Prometheus metrics; identified 31 services with missing or stale owners
+and delivered a runbook and a Grafana dashboard. Investigated service-catalog discrepancies
+with read-only SQL against PostgreSQL and ClickHouse, found ~1,800 orphaned ownership
+records, and developed a cleanup procedure with a tested rollback. Shadowed the on-call
+rotation for 6 weeks, triaged Prometheus/Grafana alerts with a mentor, and coauthored 2
+incident reports. Added tests and CI checks to an internal Go service (coverage above 70%)
+and containerized 2 Python tools for Kubernetes.
+
 DevOps Engineer - AWS Cloud Operations, HCLTech, Hyderabad, India (Apr 2022 - Dec 2023).
-Supported a US client's containerized B2B platform across dev, staging, and production
-AWS environments (ECS Fargate services behind an ALB, with RDS, Route 53, and Linux
-hosts). Weekly on-call rotation triaging CloudWatch and PagerDuty alerts, executing
-documented rollbacks/recoveries, and writing root-cause analyses. Migrated manual AWS
-resources into reusable Terraform modules (remote state, locking, PR-gated plans, drift
-detection). Rebuilt a manual release into a gated GitHub Actions pipeline with automatic
-rollback. Tuned alerting toward golden-signal and composite service-health alarms mapped
-to runbooks. Automated operations with Python/Boto3, Lambda, EventBridge, and Systems
-Manager. Remediated findings from AWS Config, Inspector, GuardDuty, and Security Hub.
+Supported a US client's AWS B2B platform (~300 business customers, ~3 million API requests
+a day) across dev, staging, and production (ECS Fargate services behind an ALB, with RDS
+and Linux hosts), troubleshooting network, database, IAM, and OS issues. On-call one week
+in four: triaged CloudWatch and PagerDuty alerts, executed documented rollbacks/recoveries,
+and wrote 10+ root-cause analyses. Replaced static-threshold alarms with golden-signal and
+composite service-health alarms mapped to runbooks, cutting pages per on-call week from
+~30 to ~11. Automated patch-compliance reporting, non-production scheduling, and health
+checks with Python/Boto3, Lambda, EventBridge, and Systems Manager (~4 hours a week
+saved); remediated 60+ findings from AWS Config, GuardDuty, and Security Hub.
+Project - Release Pipeline Automation: rebuilt a half-manual release into a gated GitHub
+Actions pipeline (tests, security scans, image versioning, staged deploys, production
+approval gate, automatic rollback), cutting releases from ~2 hours to under 20 minutes
+and ending console-based production changes.
+Project - Infrastructure-as-Code Migration: moved ~150 hand-built AWS resources into
+Terraform modules with remote state, locking, and drift detection, cutting new-environment
+setup from ~3 days to ~90 minutes.
+
+# Production Triage Toolkit (Java, Sep 2026)
+
+A Java 17 CLI with 15 read-only SQL diagnostics against PostgreSQL (data drift, stalled
+jobs, database health), ranked by severity, each linked to a runbook (confirm, fix,
+prevent, escalate). Scans 10 million rows in 1,069 ms (1,228 ms with PostgreSQL pinned to
+one CPU). Using EXPLAIN (ANALYZE, BUFFERS) he found an index causing 910,750 index probes,
+replaced an O(n^2) self-join with an O(n log n) window function (2,147 ms -> 526 ms, total
+2,647 ms -> 1,069 ms) and dropped four unused indexes (410 MB). Production-safe by design:
+write-keyword screening, server-verified read-only session, per-check query timeout.
+163 JUnit tests (121 unit, 42 PostgreSQL integration), 6 failure scenarios, 5 GitHub
+Actions CI gates including a documentation-freshness check. Ships with Docker, systemd
+units, a Kubernetes CronJob, and ECS/EventBridge Terraform.
+Repo: github.com/Abheenash/production-triage-toolkit (CASE_STUDY.md has the write-up).
 
 # Cloud projects (build -> ship -> operate -> recover)
 
@@ -85,6 +141,17 @@ Manager. Remediated findings from AWS Config, Inspector, GuardDuty, and Security
    against a 60-minute target, validated by querying the restored instance.
    Repo: github.com/Abheenash/aws-cloudops-lab
 
+5. AWS EKS Platform: production-shaped Kubernetes on Amazon EKS in Terraform (managed node
+   group, IRSA/OIDC, AWS Load Balancer Controller, Metrics Server, HPA), keyless GitHub
+   Actions deploys. Drills: a deleted pod self-healed in ~7 s; HPA scaled 2 -> 6 pods in
+   ~60 s under CPU load. Repo: github.com/Abheenash/aws-eks-platform
+
+6. Job Hunt Command Center: Cognito-authenticated serverless job tracker (API Gateway,
+   Lambda, DynamoDB, versioned S3, EventBridge, SES, Terraform). Amazon Bedrock (Claude)
+   reads recruiter email over read-only IMAP, classifies replies/interviews/rejections
+   through Step Functions, and drafts tailored resumes; includes a visa-sponsorship checker
+   and an Openings Radar. Repo: github.com/Abheenash/job-hunt-command-center
+
 # Systems / C++ projects (the foundation under the cloud work)
 
 - Parallel Thread Pool (C++): persistent workers, mutex-protected task queue, condition-
@@ -97,13 +164,23 @@ Manager. Remediated findings from AWS Config, Inspector, GuardDuty, and Security
 
 # Skills
 
-Cloud (AWS): Lambda, API Gateway, S3, DynamoDB, ECS Fargate, ECR, EC2 & Auto Scaling, RDS,
-VPC, ALB, CloudFront, Route 53, KMS, Secrets Manager, IAM, WAF, CloudWatch, X-Ray, Synthetics,
-SNS, EventBridge, Systems Manager, CloudTrail, GuardDuty, Config, Inspector, Security Hub,
-Bedrock. IaC & CI/CD: Terraform, GitHub Actions, OIDC keyless auth, branch protection.
+Languages: Python (Boto3), SQL, Java, Bash, C, C++, JavaScript, Go, Ruby, Perl.
+Operations: Linux/Unix (RHEL), incident response, on-call, root-cause analysis, runbooks,
+log analysis, query plans (EXPLAIN), ServiceNow, Control-M, GDB, Valgrind, strace.
+Monitoring: CloudWatch (alarms, dashboards, Synthetics, Logs Insights, RUM), X-Ray,
+PagerDuty, Splunk, Prometheus, Grafana, SLOs, failure drills, restore testing.
+Cloud & DevOps (AWS): EC2, ECS Fargate, EKS, ALB, S3, VPC, IAM, KMS, Lambda, API Gateway,
+DynamoDB, Cognito, EventBridge, Systems Manager, CloudFront, Route 53, Secrets Manager, WAF,
+SES, SNS, GuardDuty, Config, Security Hub, Bedrock; Terraform, GitHub Actions (OIDC keyless
+auth, branch protection), Docker, Kubernetes, CronJobs, systemd timers.
 DevSecOps: IAM least privilege, KMS/SSE encryption, Checkov, tfsec, Trivy, gitleaks.
-Observability/SRE: dashboards, alarms, Logs Insights, SLOs, incident response, runbooks, RCAs.
-Programming: Python (Boto3), Bash, SQL, C, C++ (multithreading, OpenMP, POSIX sockets). Linux.
+Databases: PostgreSQL (EXPLAIN ANALYZE, read-only sessions), RDS, MySQL, DynamoDB, Oracle,
+SQL Server, ClickHouse.
+Systems & software: TCP/IP, DNS, load balancing, auto scaling, caching, replication,
+Multi-AZ failover, object-oriented design, data structures and algorithms, complexity
+analysis, multithreading, POSIX sockets, OpenMP.
+Generative AI: Amazon Bedrock (Claude), prompt engineering, context-grounded prompting,
+prompt-injection defense, output evaluation; GitHub Copilot and Amazon Q as assistants.
 
 # This chatbot itself
 
@@ -114,7 +191,7 @@ github.com/Abheenash/portfolio-ai-assistant
 """
 
 SYSTEM_GUARD = (
-    "You are the friendly AI assistant on Rajolu Abheenash's portfolio website "
+    "You are the friendly AI assistant on Abheenash Rajolu's portfolio website "
     "(abheenash.com). Answer visitor questions about Abheenash's experience, projects, "
     "skills, and background, using ONLY the knowledge base below. Be concise, warm, and "
     "specific; a few sentences is usually enough. If a question isn't covered by the "
