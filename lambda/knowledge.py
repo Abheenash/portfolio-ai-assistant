@@ -138,6 +138,38 @@ Repo: github.com/Abheenash/production-triage-toolkit (CASE_STUDY.md has the writ
    through Step Functions, and drafts tailored resumes; includes a visa-sponsorship checker
    and an Openings Radar. Repo: github.com/Abheenash/job-hunt-command-center
 
+# September 2026 upgrades to the cloud projects (all pushed, CI green on every repo)
+
+- Production Triage Toolkit: run-to-run comparison shipped (--compare, --history-dir,
+  --fail-on-regression) classifying checks as NEW/RESOLVED/WORSENED/IMPROVED/UNCHANGED/BROKE/
+  RECOVERED; 172 tests (128 unit, 44 integration); docs-freshness gate re-verified.
+- Cloud Observability & Incident Response: multi-window multi-burn-rate SLO alarms, anomaly-
+  detection alarms (p95 latency, traffic drop), an AWS Fault Injection Service GameDay
+  experiment whose stop condition is the composite health alarm, and an automated drill
+  script; measured detection 105 s (restore -> OK 297 s) on 2026-09-19.
+- AWS Cloud Operations & Recovery Lab: both drill findings fixed (alarm on HealthyHostCount
+  below desired; RDS connection threshold derived from the instance class ceiling), the
+  non-prod scheduler as Terraform (EventBridge Scheduler, scoped IAM, errors alarm), 12 moto
+  tests, CI with a runbook link check.
+- Secure Container Pipeline: a 4th gate (pytest against mocked DynamoDB), CycloneDX SBOM,
+  image secret scan, non-root assertion, a gated CD job with keyless cosign signing, Dependabot;
+  app got /ready (DynamoDB reachable) vs /health, validation, pagination, security headers;
+  ECS deployment circuit breaker with rollback, CPU autoscaling, optional TLS 1.3 + redirect.
+- Serverless File Share: header-injection fix (filename sanitisation + RFC 5987
+  Content-Disposition), structured JSON logs, reaper partial-batch failure reporting, 16 moto
+  tests, checkov baseline (encrypted DLQ, multipart-abort lifecycle) — deployed live and
+  smoke-tested.
+- AWS EKS Platform: both drill findings fixed — preStop drain + readiness 503 on SIGTERM +
+  15 s deregistration delay (the 502s), /burn in a child process with separate
+  liveness/readiness/startup probes (the restart under load); PodDisruptionBudget; CI with
+  kubeconform and a manifest policy check; runtime image without pip/setuptools (Trivy clean).
+- Job Hunt Command Center: repair of Bedrock replies truncated at max_tokens (bracket repair
+  keeps completed values, invents nothing), 8 tests; CI runs all 12 Lambdas' suites (114 tests).
+- Portfolio AI Assistant (this chatbot): EMF metrics per request (latency, tokens, cache reads,
+  cost — $0.0015 per answer, 4,000 cache-read tokens), origin allow-list in the Lambda, history
+  repair, X-Ray, 3 alarms + dashboard, 24 tests with a fake Bedrock, and a 12-case
+  prompt-injection eval run against the live endpoint: 12/12.
+
 # Systems / C++ projects (the foundation under the cloud work) — all rebuilt Sep 2026 with
 # tests that run under ThreadSanitizer/AddressSanitizer in CI on Linux and macOS
 
