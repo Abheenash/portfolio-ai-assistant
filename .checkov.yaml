@@ -1,0 +1,15 @@
+# Reviewed baseline. Every skip has a reason; anything NOT listed here still fails CI.
+directory:
+  - terraform
+framework:
+  - terraform
+skip-check:
+  - CKV_AWS_115  # Reserved concurrency: the account is at the 10-unreserved minimum quota, which forbids reserving any; the quota is the cap and the CostUsd alarm is the guard
+  - CKV_AWS_117  # Lambda in a VPC: it only calls the public Bedrock API; a VPC would add NAT/endpoint cost for nothing
+  - CKV_AWS_116  # DLQ: the function is invoked synchronously by API Gateway; there is no async retry to dead-letter
+  - CKV_AWS_173  # KMS for env vars: they hold a model id and a metric namespace, no secrets
+  - CKV_AWS_272  # Code signing: single-owner repo deployed from Terraform; not worth a signing profile here
+  - CKV_AWS_338  # 1-year log retention: 30 days is deliberate — request logs cost money and carry no audit value
+  - CKV_AWS_158  # KMS for the log group: logs contain visitor questions, no credentials or PII beyond what they type
+  - CKV_AWS_309  # Route authorization: this is a public website widget by design; it is throttled (3 rps), origin-checked in the Lambda, and capped at 5 concurrent executions
+  - CKV_AWS_76   # API Gateway access logging: not needed — the Lambda emits one structured line per request already
