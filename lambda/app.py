@@ -159,15 +159,40 @@ Repo: github.com/Abheenash/production-triage-toolkit (CASE_STUDY.md has the writ
    through Step Functions, and drafts tailored resumes; includes a visa-sponsorship checker
    and an Openings Radar. Repo: github.com/Abheenash/job-hunt-command-center
 
-# Systems / C++ projects (the foundation under the cloud work)
+# Systems / C++ projects (the foundation under the cloud work) — all rebuilt Sep 2026 with
+# tests that run under ThreadSanitizer/AddressSanitizer in CI on Linux and macOS
 
-- Parallel Thread Pool (C++): persistent workers, mutex-protected task queue, condition-
-  variable signaling; benchmarked 5.2x speedup at 8 threads. github.com/Abheenash/parallel-thread-pool
-- Parallel Heat Diffusion (C++): 2D finite-difference PDE parallelized with std::thread and
-  OpenMP; ~2.3x speedup, characterized as memory-bound, verified race-free with a checksum.
-  github.com/Abheenash/parallel-heat-diffusion
-- Concurrent Key-Value Store (C++): multithreaded TCP store on raw POSIX sockets, thread-per-
-  connection, mutex-protected shared map. github.com/Abheenash/concurrent-kv-store
+- Parallel Thread Pool (C++17, header-only): work-stealing scheduler (per-worker deques, pop own
+  front, steal a random victim's back), submit() returning std::future with exception
+  propagation, post(), parallel_for whose calling thread helps run tasks so nested loops can't
+  deadlock, wait_idle, backpressure, graceful shutdown. Submitters only take the wake-up mutex
+  when a sleeper count says a worker is parked; workers spin briefly before parking. 16 tests.
+  Apple M4 results: 64 compute-bound tasks 5.37x on 10 cores; 1M tiny tasks 0.60 -> 1.98 M/s
+  after the spin-before-park change; fork-join spawn tree 4.24 M tasks/s stealing vs 3.38 M
+  single-queue; on heavy-tailed pre-submitted tasks stealing and a global FIFO queue tie (5.8x) —
+  reported honestly. github.com/Abheenash/parallel-thread-pool
+- Parallel Heat Diffusion (C++17): 2-D heat-equation stencil with four backends — serial,
+  spawn-per-step std::thread, persistent std::thread workers with a spinning sense-reversal
+  barrier, and OpenMP — on one flat contiguous grid. 320 backend/thread-count combinations are
+  bitwise-identical to serial (memcmp), plus physical invariants including exact mirror symmetry
+  (which required grouping the commutative neighbour pairs). A STREAM-style --bandwidth probe
+  quantifies the roofline: the 2000x2000 grid reaches ~100 GB/s at 4 threads against a measured
+  98 GB/s copy ceiling, so the ~1.9-2.0x observed is the maximum possible; a cache-resident
+  512x512 grid shows spawn-per-step slower than serial (0.81x), condvar barrier 2.14x, spin
+  barrier 2.89x. github.com/Abheenash/parallel-heat-diffusion
+- Concurrent Key-Value Store (C++17, raw POSIX sockets): Redis-style server. 64-way sharded
+  store under std::shared_mutex with lazy + swept TTL expiry; newline-framed protocol with 22
+  commands (GET SET SETNX DEL EXISTS INCR DECR INCRBY EXPIRE PEXPIRE TTL PTTL PERSIST MGET KEYS
+  DBSIZE PING ECHO INFO FLUSHALL COMPACT QUIT); append-only-file persistence with replay,
+  absolute-deadline TTLs, atomic-rename compaction and fsync always/everysec/no; two I/O
+  models — thread-per-connection and N poll() reactors that each accept from the shared
+  listener; sigwait shutdown; a load generator reporting p50/p90/p99/p99.9; Dockerfile.
+  Apple M4, loopback, 50 clients pipeline 32: 5.09 M req/s with 64 shards vs 1.23 M with a
+  global mutex (p99 1.1 ms vs 9 ms); ~200 K req/s unpipelined (kernel round trip dominates);
+  500 clients accepted 502/502 with zero errors; AOF everysec costs ~11%, always 2.5x. Five
+  real bugs found and fixed by its own tests (POLLHUP with buffered data on macOS, close() not
+  waking accept(), SIGINT ignored by background jobs, accepted sockets inheriting O_NONBLOCK on
+  BSD, listen backlog overflow with a single acceptor). github.com/Abheenash/concurrent-kv-store
 
 # Skills
 
@@ -186,7 +211,8 @@ DevSecOps: IAM least privilege, KMS/SSE encryption, Checkov, tfsec, Trivy, gitle
 Databases: Oracle, SQL Server, PostgreSQL, MySQL, DynamoDB, ClickHouse.
 Systems & software engineering: TCP/IP, DNS, load balancing, auto scaling, Multi-AZ
 failover, distributed systems, operating systems, object-oriented design, data structures,
-algorithms, complexity analysis, multithreading, POSIX sockets, OpenMP.
+algorithms, complexity analysis, multithreading, work stealing, lock sharding, POSIX sockets,
+poll() event loops, OpenMP, ThreadSanitizer/AddressSanitizer, CMake, roofline analysis.
 Generative AI: Amazon Bedrock (Claude), GitHub Copilot, Amazon Q, prompt engineering,
 context-grounded prompting, prompt-injection defense, output evaluation.
 
