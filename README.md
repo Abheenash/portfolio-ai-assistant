@@ -1,5 +1,7 @@
 # Portfolio AI Assistant
 
+> **Sep 2026:** EMF metrics per request ($0.0015/answer, 4,000 cache-read tokens), origin allow-list, X-Ray, alarms + dashboard, 24 tests, 12/12 prompt-injection eval against the live endpoint.
+
 > The "Ask AI" widget on [abheenash.com](https://abheenash.com): a serverless chatbot that answers
 > recruiter and visitor questions about me, grounded **only** in a curated knowledge base —
 > with per-answer cost, latency and prompt-cache metrics, alarms, a test suite, and a
