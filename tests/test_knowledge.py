@@ -15,7 +15,7 @@ def test_every_project_has_a_repo_link():
     for repo in ("production-triage-toolkit", "serverless-file-share", "secure-container-pipeline",
                  "cloud-observability-sre", "aws-cloudops-lab", "aws-eks-platform",
                  "job-hunt-command-center", "parallel-thread-pool", "parallel-heat-diffusion",
-                 "concurrent-kv-store", "portfolio-ai-assistant"):
+                 "concurrent-kv-store", "portfolio-ai-assistant", "aws-landing-zone"):
         assert f"github.com/Abheenash/{repo}" in KNOWLEDGE_BASE, repo
 
 

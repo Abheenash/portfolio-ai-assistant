@@ -170,6 +170,31 @@ Repo: github.com/Abheenash/production-triage-toolkit (CASE_STUDY.md has the writ
   repair, X-Ray, 3 alarms + dashboard, 24 tests with a fake Bedrock, and a 12-case
   prompt-injection eval run against the live endpoint: 12/12.
 
+# AWS Landing Zone (Sep 2026) — governance, validated not applied
+
+A multi-account foundation in Terraform: AWS Organizations with a Security / Workloads (Dev,
+Prod) / Sandbox OU tree; five service control policies as reviewable JSON (deny-root-user,
+region-lock templated from home regions, protect-security-baseline, require-cost-tags,
+sandbox-limits); a per-account baseline module (S3 public block, password policy, EBS
+encryption, budgets, and GitHub OIDC deploy roles whose trust is the main branch of named
+repos only, under a permissions boundary that denies touching the guardrails); an
+organization CloudTrail into a Security-account bucket with a root-usage alarm. Every SCP is
+unit-tested against concrete requests with a small IAM-condition evaluator (11 tests: what is
+blocked AND what must keep working, e.g. IAM/Route 53 from any region, the break-glass role).
+checkov 91/0. Deliberately not applied — creating accounts is irreversible; the docs stage and
+price the apply (stages 1–4 free). github.com/Abheenash/aws-landing-zone
+
+# More September 2026 additions
+- Secure Container Pipeline: CodeDeploy blue/green behind a variable — green target group,
+  VPC-internal test listener, canary/linear/all-at-once shifting, automatic rollback when the
+  alb-5xx, unhealthy-hosts or green-5xx alarms trip; a written bad-release drill using the app's
+  FAIL_READY switch (validated, not applied).
+- Production Triage Toolkit: --format prometheus for the node_exporter textfile collector
+  (per-check matches, ran/not-ran, duration, exit code, change counts); 176 tests, 87.2% coverage.
+- Concurrent KV Store: kqueue (macOS/BSD) / epoll (Linux) event reactor alongside poll and
+  thread-per-connection; tail latency halves vs poll (p99 1.33 -> 0.63 ms at 50 clients,
+  12.3 -> 7.7 ms at 500); all three modes pass the end-to-end suite under ThreadSanitizer.
+
 # Systems / C++ projects (the foundation under the cloud work) — all rebuilt Sep 2026 with
 # tests that run under ThreadSanitizer/AddressSanitizer in CI on Linux and macOS
 
