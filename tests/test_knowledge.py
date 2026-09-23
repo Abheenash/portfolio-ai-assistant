@@ -3,7 +3,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lambda"))
-from knowledge import KNOWLEDGE_BASE  # noqa: E402
+from knowledge import KNOWLEDGE_BASE
 
 
 def test_current_role_and_every_employer_present():

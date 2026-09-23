@@ -1,5 +1,6 @@
 """Handler tests with a fake Bedrock client — no network, no AWS credentials."""
 import io
+import itertools
 import json
 import os
 import sys
@@ -9,7 +10,7 @@ from botocore.exceptions import ClientError
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lambda"))
 os.environ["ALLOW_ORIGIN"] = "https://abheenash.com,https://www.abheenash.com"
-import app  # noqa: E402
+import app
 
 
 class FakeBedrock:
@@ -124,7 +125,9 @@ def test_history_is_trimmed_and_repaired():
     msgs = app.build_messages(history, "now")
     assert len(msgs) <= app.MAX_HISTORY_TURNS + 1
     assert msgs[0]["role"] == "user" and msgs[-1] == {"role": "user", "content": "now"}
-    for a, b in zip(msgs, msgs[1:]):
+    # pairwise makes the intent (consecutive pairs) explicit and cannot
+    # silently truncate the way a mismatched zip() would.
+    for a, b in itertools.pairwise(msgs):
         assert a["role"] != b["role"]
 
 
