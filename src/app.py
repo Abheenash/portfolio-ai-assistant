@@ -16,6 +16,7 @@ import uuid
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
+
 from knowledge import KNOWLEDGE_BASE
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
@@ -145,7 +146,7 @@ def emit(record):
     }
     # Lambda sends stdout straight to CloudWatch Logs; this IS the structured
     # log line for the request, emitted as one JSON object per invocation.
-    print(json.dumps(doc, default=str))  # noqa: T201
+    print(json.dumps(doc, default=str))
 
 
 # Bedrock's cross-region inference profile re-routes each call across US regions.

@@ -2,7 +2,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lambda"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from knowledge import KNOWLEDGE_BASE
 
 

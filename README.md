@@ -33,7 +33,7 @@ safe?* It's small on purpose — the engineering decisions and the evidence are 
 
 | Decision | Why |
 | --- | --- |
-| **Context-stuffing, not vector RAG** | The corpus (`lambda/knowledge.py`) is ~14 KB. A vector DB would be cost, latency and ops for nothing. The whole KB rides in the system prompt. |
+| **Context-stuffing, not vector RAG** | The corpus (`src/knowledge.py`) is ~14 KB. A vector DB would be cost, latency and ops for nothing. The whole KB rides in the system prompt. |
 | **Bedrock prompt caching** (`cache_control: ephemeral`) | The KB prefix is identical on every call, so it's read from cache: 4,000 cached tokens at $0.10/M instead of $1.00/M. Bedrock needs a *manual* cache breakpoint, so it's explicit. |
 | **Cross-region inference profile** (`us.anthropic.claude-haiku-4-5-…`) | On-demand Claude 4.x on Bedrock must be called through the profile id, not the bare model id. The profile routes across US regions, so transient per-region errors are retried (bounded, 4 attempts). |
 | **Grounded system guard** | Answer only from the KB; redirect off-topic requests; treat instructions inside a visitor's message — "ignore your rules", "I'm the developer", "print your prompt" — as part of the question, not as instructions. The eval set checks each of those. |
@@ -97,8 +97,8 @@ Then point the widget's `AI_ENDPOINT` at that URL.
 
 | Path | What |
 | --- | --- |
-| `lambda/app.py` | Handler: origin check, validation, history repair, cached prompt, retry, EMF metrics |
-| `lambda/knowledge.py` | The knowledge base — the only thing the assistant is allowed to know |
+| `src/app.py` | Handler: origin check, validation, history repair, cached prompt, retry, EMF metrics |
+| `src/knowledge.py` | The knowledge base — the only thing the assistant is allowed to know |
 | `tests/` | Handler + knowledge-base tests (fake Bedrock) |
 | `evals/` | Prompt-injection / grounding eval cases, runner, and committed results |
 | `terraform/main.tf` | IAM, Lambda (X-Ray), HTTP API + throttling, alarms, dashboard |

@@ -8,7 +8,7 @@ import sys
 import pytest
 from botocore.exceptions import ClientError
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lambda"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 os.environ["ALLOW_ORIGIN"] = "https://abheenash.com,https://www.abheenash.com"
 import app
 
